@@ -19,3 +19,14 @@ function search_file_attachments_menu() {
   );
   return $items;
 }
+
+/**
+ * Implements hook_permission().
+ */
+function search_file_attachments_permission() {
+  return array(
+    'administer search file attachments' => array(
+      'title' => t('Administer search file attachments'),
+    ),
+  );
+}

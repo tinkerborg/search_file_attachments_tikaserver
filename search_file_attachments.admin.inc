@@ -10,18 +10,34 @@
  */
 function search_file_attachments_settings_form() {
   $form = array();
-  $form['search_file_attachments_tika_path'] = array(
+
+  // Apache Tika configuration.
+  $form['tika'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Apache Tika'),
+  );
+  $form['tika']['search_file_attachments_tika_path'] = array(
     '#type' => 'textfield',
     '#title' => t('Tika directory path:'),
     '#default_value' => variable_get('search_file_attachments_tika_path', ''),
     '#description' => t('The full path to tika directory.'),
   );
-
-  $form['search_file_attachments_tika_jar'] = array(
+  $form['tika']['search_file_attachments_tika_jar'] = array(
     '#type' => 'textfield',
     '#title' => t('Tika jar file:'),
     '#default_value' => variable_get('search_file_attachments_tika_jar', 'tika-app-1.1.jar'),
     '#description' => t('The name of the tika CLI application jar file, e.g. tika-app-1.1.jar.'),
+  );
+
+  // File settings.
+  $form['files'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('File settings'),
+  );
+  $form['files']['exclude_formats'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Exclude file extensions'),
+    '#default_value' => variable_get('search_file_attachments_exclude_formats', 'aif, art, avi, bmp, gif, ico, mov, oga, ogv, png, psd, ra, ram, rgb'),
   );
 
   return system_settings_form($form);

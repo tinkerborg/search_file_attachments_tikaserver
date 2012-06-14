@@ -1,0 +1,5 @@
+name = Search File Attachments
+description = Makes the content of attached files searchable.
+dependencies[] = search
+core = 7.x
+package = Search

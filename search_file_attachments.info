@@ -3,3 +3,5 @@ description = Makes the content of attached files searchable.
 dependencies[] = search
 core = 7.x
 package = Search
+
+configure = admin/config/search/file_attachments

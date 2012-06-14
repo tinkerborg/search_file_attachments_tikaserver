@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * @file
+ * Contains the functionality for the Search File Attachments module.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function search_file_attachments_menu() {
+  $items['admin/config/search/file_attachments'] = array(
+    'title' => 'Search File Attachments settings',
+    'description' => 'Configure the file search settings.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('search_file_attachments_settings_form'),
+    'access arguments' => array('administer search file attachments'),
+    'file' => 'search_file_attachments.admin.inc',
+  );
+  return $items;
+}

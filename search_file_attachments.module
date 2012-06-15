@@ -73,7 +73,9 @@ function search_file_attachments_update_index() {
     $content = search_file_attachments_get_file_content($file);
     search_index($file->fid, 'file', $content);
 
-    // TODO: Cache the extracted file content to use it for the search results.
+    // Cache the extracted file content to use it later for the search results.
+    $record = array('fid' => $file->fid, 'content' => $content);
+    drupal_write_record('search_file_attachments_index', $record);
 
     variable_set('search_file_attachments_cron_last_change', $last_change);
     variable_set('search_file_attachments_cron_last_id', $last_id);

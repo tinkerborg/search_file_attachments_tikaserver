@@ -15,7 +15,7 @@
  *   The array with the active markers.
  *     - Key: The Original IPTC Code for the field
  *     - Value: The translated field name.
- *   e.g.: $tagmarker['2#025'] = t('Keyswords')
+ *   e.g.: $tagmarker['2#025'] = t('Keywords')
  *
  * Metadata keywords list:
  *   - 1#090 = Iptc.Envelope.CharacterSet

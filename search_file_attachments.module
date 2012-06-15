@@ -71,12 +71,15 @@ function search_file_attachments_update_index() {
     $last_id = $file->fid;
 
     if (!in_array($file->filemime, $excluded_extensions)) {
+      $content = t('Filename') . ': ' . $file->filename . ' - '. t('Content') . ': ';
+
       // Extract the file content and add it to the drupal search index.
-      $content = search_file_attachments_get_file_content($file);
+      $extracted_content = search_file_attachments_get_file_content($file);
+      $content .= $extracted_content;
       search_index($file->fid, 'file', $content);
 
       // Cache the extracted file content to use it later for the search results.
-      $record = array('fid' => $file->fid, 'content' => $content);
+      $record = array('fid' => $file->fid, 'content' => $extracted_content);
       drupal_write_record('search_file_attachments_index', $record);
     }
 

@@ -52,7 +52,7 @@ function search_file_attachments_get_files($last_change = 0, $last_id = 0) {
 /**
  * Extract the content of the given file.
  *
- * @param $file
+ * @param object $file
  *   The file object where the content should be extracted.
  *
  * @return string
@@ -77,7 +77,7 @@ function search_file_attachments_get_file_content($file) {
 /**
  * Extract simple text.
  *
- * @param $file
+ * @param object $file
  *   The file object.
  *
  * @return mixed|string
@@ -95,7 +95,7 @@ function search_file_attachments_extract_simple($file) {
 /**
  * Extract IPTC metadata from image.
  *
- * @param $file
+ * @param object $file
  *   The file object.
  *
  * @return string
@@ -142,7 +142,7 @@ function search_file_attachments_extract_exif($file) {
 /**
  * Extract file content with Apache Tika.
  *
- * @param $file
+ * @param object $file
  *   The file object.
  *
  * @return string
@@ -224,7 +224,7 @@ function search_file_attachments_excluded_extensions() {
     $mapping = file_mimetype_mapping();
 
     foreach ($excluded_extensions as $ext) {
-      $ext = strtolower($ext);
+      $ext = drupal_strtolower($ext);
       $mimetype = 'application/octet-stream';
       if (isset($mapping['extensions'][$ext])) {
         $mimetype_key = $mapping['extensions'][$ext];

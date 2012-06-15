@@ -193,3 +193,39 @@ function search_file_attachments_exif_tagmarker() {
 
   return $tagmarker;
 }
+
+/**
+ * Get the mimetypes of the excluded file extensions.
+ *
+ * @return array
+ *   The exluded mimetypes.
+ */
+function search_file_attachmentes_excluded_extensions() {
+  // Get the excluded formats.
+  $excluded_extensions = variable_get('search_file_attachments_exclude_formats', '');
+  $excluded_extensions = preg_replace('/[^a-zA-z0-9,]/', '', $excluded_extensions);
+  $excluded_extensions = explode(',', $excluded_extensions);
+
+  $exclude = array();
+
+  if (!empty($excluded_extensions)) {
+    // The default file map, defined in file.mimetypes.inc is quite big.
+    // We only load it when necessary.
+    include_once DRUPAL_ROOT . '/includes/file.mimetypes.inc';
+    $mapping = file_mimetype_mapping();
+
+    foreach ($excluded_extensions as $ext) {
+      $ext = strtolower($ext);
+      $mimetype = 'application/octet-stream';
+      if (isset($mapping['extensions'][$ext])) {
+        $mimetype_key = $mapping['extensions'][$ext];
+        if (isset($mapping['mimetypes'][$mimetype_key])) {
+          $mimetype = $mapping['mimetypes'][$mimetype_key];
+        }
+      }
+      $exclude[] = $mimetype;
+    }
+  }
+
+  return $exclude;
+}

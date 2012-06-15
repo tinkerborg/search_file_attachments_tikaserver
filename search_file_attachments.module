@@ -92,3 +92,39 @@ function search_file_attachments_search_status() {
     WHERE f.status = 1 AND d.sid IS NULL OR d.reindex <> 0")->fetchField();
   return array('remaining' => $remaining, 'total' => $total);
 }
+
+/**
+ * Implements hook_search_execute().
+ */
+function search_file_attachments_search_execute($keys, $conditions) {
+  // Build matching conditions.
+  $query = db_select('search_index', 'i', array('target' => 'slave'))
+             ->extend('SearchQuery')->extend('PagerDefault');
+  $query->fields('f', array('fid', 'uri', 'filename', 'filemime', 'filesize'));
+  $query->addField('sfa', 'content');
+  $query->join('file_managed', 'f', 'f.fid = i.sid');
+  $query->join('search_file_attachments_index', 'sfa', 'sfa.fid = i.sid');
+  $query->searchExpression($keys, 'file');
+  $query->setOption('filename', 'f.filename');
+
+  // Only continue if the first pass query matches.
+  if (!$query->executeFirstPass()) {
+    return array();
+  }
+
+  // Load results.
+  $find = $query->limit(10)->execute();
+  $results = array();
+  foreach ($find as $item) {
+    $uri = file_create_url($item->uri);
+    $results[] = array(
+      'title' => check_plain(ucfirst($item->filename)),
+      'link' => url($uri, array(), array('absolute' => TRUE)),
+      'type' => $item->filemime,
+      'extra' => array(format_size($item->filesize)),
+      'snippet' => search_excerpt($keys, $item->content),
+      'language' => LANGUAGE_NONE,
+    );
+  }
+  return $results;
+}

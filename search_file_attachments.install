@@ -17,7 +17,7 @@ function search_file_attachments_requirements($phase) {
     $temp = tempnam(file_directory_temp(), 'asa');
     exec('java -version > ' . $temp . ' 2>&1');
     $stderror = file_get_contents($temp);
-    $found = preg_match('/Runtime Environment', $stderror);
+    $found = preg_match('/Runtime Environment/', $stderror);
 
     if (!$found) {
       $requirements['search_file_attachments_java'] = array(
@@ -52,6 +52,9 @@ function search_file_attachments_install() {
 function search_file_attachments_uninstall() {
   variable_del('search_file_attachments_tika_path');
   variable_del('search_file_attachments_tika_jar');
+  variable_del('search_file_attachments_exclude_formats');
+  variable_del('search_file_attachments_cron_last_change');
+  variable_del('search_file_attachments_cron_last_id');
   drupal_uninstall_schema('search_file_attachments_index');
 }
 

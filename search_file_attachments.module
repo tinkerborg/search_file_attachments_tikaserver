@@ -30,3 +30,63 @@ function search_file_attachments_permission() {
     ),
   );
 }
+
+/**
+ * Implements hook_search_info().
+ */
+function search_file_attachments_search_info() {
+  return array(
+    'title' => t('Files'),
+    'path' => 'files',
+  );
+}
+
+/**
+ * Implements hook_search_reset().
+ */
+function search_file_attachments_search_reset() {
+  variable_del('search_file_attachments_cron_last_change');
+  variable_del('search_file_attachments_cron_last_id');
+  db_truncate('search_file_attachments_index')->execute();
+  return;
+}
+
+/**
+ * Implements hook_update_index().
+ */
+function search_file_attachments_update_index() {
+  global $last_change, $last_id;
+  module_load_include('inc', 'search_file_attachments');
+  register_shutdown_function('search_file_attachments_shutdown');
+
+  $last_change = variable_get('search_file_attachments_cron_last_change', 0);
+  $last_id = variable_get('search_file_attachments_cron_last_id', 0);
+  $limit = (int) variable_get('search_cron_limit', 10);
+
+  $index_files = search_file_attachments_get_files($last_change, $last_id);
+
+  foreach ($index_files as $file) {
+    $last_change = $file->timestamp;
+    $last_id = $file->fid;
+
+    // Extract the file content and add it to the drupal search index.
+    $content = search_file_attachments_get_file_content($file);
+    search_index($file->fid, 'file', $content);
+
+    // TODO: Cache the extracted file content to use it for the search results.
+
+    variable_set('search_file_attachments_cron_last_change', $last_change);
+    variable_set('search_file_attachments_cron_last_id', $last_id);
+  }
+}
+
+/**
+ * Implements hook_search_status().
+ */
+function search_file_attachments_search_status() {
+  $total = db_query('SELECT COUNT(*) FROM {file_managed} WHERE status = 1')->fetchField();
+  $remaining = db_query("SELECT COUNT(*) FROM {file_managed} f
+    LEFT JOIN {search_dataset} d ON d.type = 'file' AND d.sid = f.fid
+    WHERE f.status = 1 AND d.sid IS NULL OR d.reindex <> 0")->fetchField();
+  return array('remaining' => $remaining, 'total' => $total);
+}

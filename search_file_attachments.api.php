@@ -11,7 +11,7 @@
  * Modules implementing this hook can controlled, what information can
  * be extracted.
  *
- * @param $tagmarker
+ * @param array $tagmarker
  *   The array with the active markers.
  *     - Key: The Original IPTC Code for the field
  *     - Value: The translated field name.
@@ -42,7 +42,7 @@
  *   - 2#118 = Iptc.Contact
  *   - 2#120 = Iptc.Caption
  *   - 2#122 = Iptc.CaptionWriter
-*/
+ */
 function hook_search_file_attachments_exif_tagmarker_alter(&$tagmarker) {
   // Add the keyswords tagmarker.
   $tagmarker['2#025'] = t('Keywords');

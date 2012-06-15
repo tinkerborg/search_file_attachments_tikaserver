@@ -9,10 +9,10 @@
  * Shutdown function to make sure we remember the last element processed.
  */
 function search_file_attachments_shutdown() {
-  global $last_change, $last_id;
-  if ($last_change && $last_id) {
-    variable_set('search_file_attachments_cron_last_change', $last_change);
-    variable_set('search_file_attachments_cron_last_id', $last_id);
+  global $_search_file_attachments_last_change, $_search_file_attachments_last_id;
+  if ($_search_file_attachments_last_change && $_search_file_attachments_last_id) {
+    variable_set('search_file_attachments_cron_last_change', $_search_file_attachments_last_change);
+    variable_set('search_file_attachments_cron_last_id', $_search_file_attachments_last_id);
   }
 }
 
@@ -20,7 +20,10 @@ function search_file_attachments_shutdown() {
  * Load the files to be indexed.
  *
  * @param int $last_change
+ *   The timestamp of the last indexed file.
  * @param int $last_id
+ *   The fid of the last indexed file.
+ *
  * @return array
  *   The array with the file objects.
  */
@@ -51,14 +54,17 @@ function search_file_attachments_get_files($last_change = 0, $last_id = 0) {
  *
  * @param $file
  *   The file object where the content should be extracted.
+ *
  * @return string
  *   The extracted file content.
  */
 function search_file_attachments_get_file_content($file) {
+  $image_mimetypes = array('image/jpeg', 'image/jpg', 'image/tiff');
+
   if ($file->filemime == 'text/plain' || $file->filemime == 'text/x-diff') {
     $content = search_file_attachments_extract_simple($file);
   }
-  elseif (in_array($file->filemime, array('image/jpeg', 'image/jpg', 'image/tiff'))) {
+  elseif (in_array($file->filemime, $image_mimetypes)) {
     $content = search_file_attachments_extract_exif($file);
   }
   else {
@@ -73,6 +79,7 @@ function search_file_attachments_get_file_content($file) {
  *
  * @param $file
  *   The file object.
+ *
  * @return mixed|string
  *   The extracted content.
  */
@@ -90,6 +97,7 @@ function search_file_attachments_extract_simple($file) {
  *
  * @param $file
  *   The file object.
+ *
  * @return string
  *   The extracted IPTC content.
  */
@@ -136,6 +144,7 @@ function search_file_attachments_extract_exif($file) {
  *
  * @param $file
  *   The file object.
+ *
  * @return string
  *   The extracted content.
  * @throws Exception
@@ -162,7 +171,7 @@ function search_file_attachments_extract_tika($file) {
   return shell_exec($cmd);
 }
 
-/*
+/**
  * Defines the IPTC fields to be used for the search index.
  */
 function search_file_attachments_exif_tagmarker() {
@@ -200,7 +209,7 @@ function search_file_attachments_exif_tagmarker() {
  * @return array
  *   The exluded mimetypes.
  */
-function search_file_attachmentes_excluded_extensions() {
+function search_file_attachments_excluded_extensions() {
   // Get the excluded formats.
   $excluded_extensions = variable_get('search_file_attachments_exclude_formats', '');
   $excluded_extensions = preg_replace('/[^a-zA-z0-9,]/', '', $excluded_extensions);

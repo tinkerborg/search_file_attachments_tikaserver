@@ -38,7 +38,8 @@ function search_file_attachments_install() {
   // keep timing out.
   if (variable_get('search_cron_limit', 100) > 10) {
     variable_set('search_cron_limit', 10);
-    drupal_set_message(st('Your search cron limit, which limits the number of
+    $t = get_t();
+    drupal_set_message($t('Your search cron limit, which limits the number of
       items searched per cron run, has been set to 10. If it had been left
       at the default 100 your cron job could potentially continously timeout.
       If you want to cha ge this back you can do so <a href="!link">here</a>',
@@ -63,7 +64,7 @@ function search_file_attachments_uninstall() {
  */
 function search_file_attachments_schema() {
   $schema['search_file_attachments_index'] = array(
-    'description' => t('Stores the extracted content from files'),
+    'description' => 'Stores the extracted content from files',
     'fields' => array(
       'fid' => array(
         'description' => 'The {file_managed}.fid being referenced to a file.',

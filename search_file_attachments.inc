@@ -197,7 +197,7 @@ function search_file_attachments_exif_tagmarker() {
     '2#122' => t('Caption Writer'),
   );
 
-  // Allow other modules to alter the editor settings for this format.
+  // Allow other modules to alter defined IPTC fields.
   drupal_alter('search_file_attachments_exif_tagmarker', $tagmarker);
 
   return $tagmarker;

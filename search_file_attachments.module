@@ -45,9 +45,20 @@ function search_file_attachments_search_info() {
  * Implements hook_search_reset().
  */
 function search_file_attachments_search_reset() {
-  variable_del('search_file_attachments_cron_last_change');
-  variable_del('search_file_attachments_cron_last_id');
+  // Reset the index status variables.
+  variable_set('search_file_attachments_cron_last_change', 0);
+  variable_set('search_file_attachments_cron_last_id', 0);
+
+  // Empty the file content table, because all content will be extracted
+  // again.
   db_truncate('search_file_attachments_index')->execute();
+
+  // Set rebuilt to the file datasets.
+  db_update('search_dataset')
+    ->fields(array('reindex' => REQUEST_TIME))
+    ->condition('type', 'file')
+    ->execute();
+
   return;
 }
 

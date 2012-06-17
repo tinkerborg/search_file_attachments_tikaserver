@@ -135,3 +135,14 @@ function search_file_attachments_search_execute($keys, $conditions) {
   }
   return $results;
 }
+
+/**
+ * Implements hook_file_delete().
+ */
+function search_file_attachments_file_delete($file) {
+  // Delete the entry from the search index.
+  search_reindex($file->fid, 'file');
+
+  // Delete the file content cache entry.
+  db_delete('search_file_attachments_index')->condition('fid', $file->fid)->execute();
+}

@@ -61,7 +61,6 @@ function search_file_attachments_update_index() {
 
   $_search_file_attachments_last_change = variable_get('search_file_attachments_cron_last_change', 0);
   $_search_file_attachments_last_id = variable_get('search_file_attachments_cron_last_id', 0);
-  $limit = (int) variable_get('search_cron_limit', 10);
 
   $index_files = search_file_attachments_get_files($_search_file_attachments_last_change, $_search_file_attachments_last_id);
   $excluded_extensions = search_file_attachments_excluded_extensions();

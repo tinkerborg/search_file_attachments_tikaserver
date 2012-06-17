@@ -126,7 +126,7 @@ function search_file_attachments_extract_exif($file) {
         }
 
         if (!empty($iptc_field_value)) {
-          $iptc[$tagmarker[$key]] = implode(', ', $iptc_field_value);
+          $iptc[$tagmarker][$key] = implode(', ', $iptc_field_value);
         }
       }
     }

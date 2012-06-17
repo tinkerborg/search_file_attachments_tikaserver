@@ -57,6 +57,15 @@ function search_file_attachments_uninstall() {
   variable_del('search_file_attachments_cron_last_change');
   variable_del('search_file_attachments_cron_last_id');
   drupal_uninstall_schema('search_file_attachments_index');
+
+  // Remove the search index data, that comes from Search File Attachments.
+  $query = db_select('search_dataset', 'sd');
+  $query->fields('sd', array('sid'))
+        ->condition('sd.type', 'file');
+  $results = $query->execute();
+  foreach ($results as $record) {
+    search_reindex($record->sid, 'file');
+  }
 }
 
 /**

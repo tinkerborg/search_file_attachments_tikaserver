@@ -86,7 +86,6 @@ function search_file_attachments_get_file_content($file) {
 function search_file_attachments_extract_simple($file) {
   $content = file_get_contents(file_create_url($file->uri));
   $content = iconv("UTF-8", "UTF-8//IGNORE", $content);
-  $content = filter_xss(str_replace(array('<', '>'), array(' <', '> '), $content), array());
   $content = htmlspecialchars(html_entity_decode($content, ENT_NOQUOTES, 'UTF-8'), ENT_NOQUOTES, 'UTF-8');
   $content = trim($content);
   return $content;
@@ -118,7 +117,6 @@ function search_file_attachments_extract_exif($file) {
       if (array_key_exists($key, $tagmarker)) {
         $iptc_field_value = array();
         foreach ($value as $innerkey => $innervalue) {
-          $innervalue = filter_xss(str_replace(array('<', '>'), array(' <', '> '), $innervalue), array());
           $innervalue = trim($innervalue);
           if (!empty($innervalue)) {
             $iptc_field_value[] = $innervalue;
@@ -126,7 +124,7 @@ function search_file_attachments_extract_exif($file) {
         }
 
         if (!empty($iptc_field_value)) {
-          $iptc[$tagmarker][$key] = implode(', ', $iptc_field_value);
+          $iptc[$tagmarker[$key]] = implode(', ', $iptc_field_value);
         }
       }
     }
@@ -163,7 +161,7 @@ function search_file_attachments_extract_tika($file) {
     $param = ' -Dfile.encoding=UTF8 -cp ' . escapeshellarg($tika_path);
   }
 
-  $cmd = escapeshellcmd('java') . $param . ' -jar ' . escapeshellarg($tika) . ' -t ' . escapeshellarg($filepath);
+  $cmd = 'java' . $param . ' -jar ' . escapeshellarg($tika) . ' -t ' . escapeshellarg($filepath);
   if (strpos(ini_get('extension_dir'), 'MAMP/')) {
     $cmd = 'export DYLD_LIBRARY_PATH=""; ' . $cmd;
   }

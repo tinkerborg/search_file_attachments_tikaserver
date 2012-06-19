@@ -102,6 +102,7 @@ function search_file_attachments_schema() {
       'content' => array(
         'description' => 'The extracted content fromt the file.',
         'type' => 'text',
+        'size' => 'big',
         'not null' => FALSE,
       ),
     ),

@@ -23,7 +23,26 @@ function search_file_attachments_requirements($phase) {
       $requirements['search_file_attachments_java'] = array(
         'title' => $t('Java executable not found'),
         'description' => $t('Could not execute a java command.'),
-        'severity' => REQUIREMENT_INFO,
+        'severity' => REQUIREMENT_WARNING,
+      );
+    }
+
+    // Check if Safe Mode enabled or exec() is disabled.
+    if ($safe_mode = ini_get('safe_mode') && strtolower($safe_mode) != 'off' ) {
+      $requirements['search_file_attachments_safe_mode'] = array(
+        'title' => $t('Save Mode is activated'),
+        'description' => $t('Save Mode is enabled in your PHP settings.
+          You need to disabled it so that Tika can be executed.'),
+        'severity' => REQUIREMENT_ERROR,
+      );
+    }
+
+    if (in_array('exec', array_map('trim', explode(',', ini_get('disable_functions'))))) {
+      $requirements['search_file_attachments_exec'] = array(
+        'title' => $t('exec() is disabled.'),
+        'description' => $t('The PHP function exec() is disabled in your
+          PHP settings (php.ini). Tika can not be executed.'),
+        'severity' => REQUIREMENT_ERROR,
       );
     }
   }

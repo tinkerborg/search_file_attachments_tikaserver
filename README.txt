@@ -13,6 +13,9 @@ REQUIREMENTS
 Requires the ability to run java on your server (for the Apache Tika library)
 and an installation of the Apache Tika library.
 
+In your PHP settings (php.ini) the Safe Mode must be disabled and the exec()
+function should not be disabled.
+
 INSTALLATION
 ============
 1. Install java on your machine, if not yet done.

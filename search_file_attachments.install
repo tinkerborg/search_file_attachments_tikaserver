@@ -28,7 +28,7 @@ function search_file_attachments_requirements($phase) {
     }
 
     // Check if Safe Mode enabled or exec() is disabled.
-    if ($safe_mode = ini_get('safe_mode') && strtolower($safe_mode) != 'off' ) {
+    if ($safe_mode = ini_get('safe_mode') && drupal_strtolower($safe_mode) != 'off') {
       $requirements['search_file_attachments_safe_mode'] = array(
         'title' => $t('Save Mode is activated'),
         'description' => $t('Save Mode is enabled in your PHP settings.

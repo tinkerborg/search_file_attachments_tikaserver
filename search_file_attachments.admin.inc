@@ -34,7 +34,7 @@ function search_file_attachments_settings_form() {
     '#type' => 'fieldset',
     '#title' => t('File settings'),
   );
-  $form['files']['exclude_formats'] = array(
+  $form['files']['search_file_attachments_exclude_formats'] = array(
     '#type' => 'textfield',
     '#title' => t('Exclude file extensions'),
     '#default_value' => variable_get('search_file_attachments_exclude_formats', 'aif, art, avi, bmp, gif, ico, mov, oga, ogv, png, psd, ra, ram, rgb'),

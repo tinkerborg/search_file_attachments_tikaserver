@@ -6,6 +6,34 @@
  */
 
 /**
+ * Check if java is available and executable.
+ *
+ * @param string $path
+ *   The full path to the Java binary. e.g. /usr/bin/java
+ */
+function search_file_attachments_check_java($path = NULL) {
+  $path = $path ? $path : 'java';
+
+  $temp = tempnam(file_directory_temp(), 'asa');
+  exec($path . ' -version > ' . $temp . ' 2>&1');
+  $stderror = file_get_contents($temp);
+  $found = preg_match('/Runtime Environment/', $stderror);
+
+  return $found ? TRUE : FALSE;
+}
+
+/**
+ * Returns the path to the java binary.
+ *
+ * @return string
+ */
+function search_file_attachments_java_path() {
+  $settings_path = variable_get('search_file_attachments_java_path', '');
+  $path = !empty($settings_path) ? $settings_path : 'java';
+  return $path;
+}
+
+/**
  * Shutdown function to make sure we remember the last element processed.
  */
 function search_file_attachments_shutdown() {
@@ -156,12 +184,13 @@ function search_file_attachments_extract_tika($file) {
   }
 
   $param = '';
+  $java_path = search_file_attachments_java_path();
 
   if ($file->filemime != 'audio/mpeg') {
     $param = ' -Dfile.encoding=UTF8 -cp ' . escapeshellarg($tika_path);
   }
 
-  $cmd = 'java' . $param . ' -jar ' . escapeshellarg($tika) . ' -t ' . escapeshellarg($filepath);
+  $cmd = $java_path . $param . ' -jar ' . escapeshellarg($tika) . ' -t ' . escapeshellarg($filepath);
   if (strpos(ini_get('extension_dir'), 'MAMP/')) {
     $cmd = 'export DYLD_LIBRARY_PATH=""; ' . $cmd;
   }

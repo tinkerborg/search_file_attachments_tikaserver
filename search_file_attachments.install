@@ -12,18 +12,17 @@ function search_file_attachments_requirements($phase) {
   $requirements = array();
   $t = get_t();
 
+  require_once dirname(__FILE__) . '/search_file_attachments.inc';
   if ($phase == 'runtime') {
     // Check if java is available and executable.
-    $temp = tempnam(file_directory_temp(), 'asa');
-    exec('java -version > ' . $temp . ' 2>&1');
-    $stderror = file_get_contents($temp);
-    $found = preg_match('/Runtime Environment/', $stderror);
-
-    if (!$found) {
+    if (!search_file_attachments_check_java()) {
       $requirements['search_file_attachments_java'] = array(
         'title' => $t('Java executable not found'),
-        'description' => $t('Could not execute a java command.'),
-        'severity' => REQUIREMENT_WARNING,
+        'description' => $t('Could not execute a java command. You may need to
+          set the path of the correct java binary in the
+          <a href="!link">module settings</a>.',
+          array('!link' => url('admin/config/search/file_attachments'))),
+        'severity' => REQUIREMENT_INFO,
       );
     }
 
@@ -72,6 +71,7 @@ function search_file_attachments_install() {
 function search_file_attachments_uninstall() {
   variable_del('search_file_attachments_tika_path');
   variable_del('search_file_attachments_tika_jar');
+  variable_del('search_file_attachments_java_path');
   variable_del('search_file_attachments_exclude_formats');
   variable_del('search_file_attachments_cron_last_change');
   variable_del('search_file_attachments_cron_last_id');

@@ -5,6 +5,8 @@
  * Admin settings
  */
 
+require_once dirname(__FILE__) . '/search_file_attachments.inc';
+
 /**
  * Page callback to show the settings for the attachments.
  */
@@ -25,9 +27,17 @@ function search_file_attachments_settings_form() {
   $form['tika']['search_file_attachments_tika_jar'] = array(
     '#type' => 'textfield',
     '#title' => t('Tika jar file:'),
-    '#default_value' => variable_get('search_file_attachments_tika_jar', 'tika-app-1.1.jar'),
-    '#description' => t('The name of the tika CLI application jar file, e.g. tika-app-1.1.jar.'),
+    '#default_value' => variable_get('search_file_attachments_tika_jar', 'tika-app-1.2.jar'),
+    '#description' => t('The name of the tika CLI application jar file, e.g. tika-app-1.2.jar.'),
   );
+  if (!search_file_attachments_check_java()) {
+    $form['tika']['search_file_attachments_java_path'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Java path:'),
+      '#default_value' => variable_get('search_file_attachments_java_path', ''),
+      '#description' => t('The full path to the Java binary. This setting is only needed if Java could not automatically detected.'),
+    );
+  }
 
   // File settings.
   $form['files'] = array(
@@ -53,5 +63,8 @@ function search_file_attachments_settings_form_validate($form, &$form_state) {
   $path = realpath($form_state['values']['search_file_attachments_tika_path']);
   if (!file_exists($path . '/' . $form_state['values']['search_file_attachments_tika_jar'])) {
     form_set_error('search_file_attachments_tika_path', t('Tika jar file not found at this path.'));
+  }
+  if (isset($form_state['values']['search_file_attachments_java_path']) && !search_file_attachments_check_java($form_state['values']['search_file_attachments_java_path'])) {
+    form_set_error('search_file_attachments_java_path', t('Java was not found or is executable at the specified path.'));
   }
 }

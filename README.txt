@@ -26,7 +26,7 @@ INSTALLATION
 5. Go to the configuaration page: admin/config/search/file_attachments
    5.1. Set the full path to the tika-app-x.x.jar file from step 2.
         e.g. /var/apache-tika/
-   5.2. Enter the name of the jar file: e.g. tika-app-1.1.jar
+   5.2. Enter the name of the jar file: e.g. tika-app-1.2.jar
 6. Go to the search configuration page: /admin/config/search/settings
    and activate 'Search File Attachments' under the 'Active search modules'
    section.

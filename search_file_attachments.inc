@@ -15,6 +15,9 @@ function search_file_attachments_check_java($path = NULL) {
   $path = $path ? $path : 'java';
 
   $temp = tempnam(file_directory_temp(), 'asa');
+  if (strpos(ini_get('extension_dir'), 'MAMP/')) {
+    $path = 'export DYLD_LIBRARY_PATH=""; ' . $path;
+  }
   exec($path . ' -version > ' . $temp . ' 2>&1');
   $stderror = file_get_contents($temp);
   $found = preg_match('/Runtime Environment/', $stderror);

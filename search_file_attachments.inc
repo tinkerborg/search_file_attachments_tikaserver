@@ -193,9 +193,17 @@ function search_file_attachments_extract_tika($file) {
     $param = ' -Dfile.encoding=UTF8 -cp ' . escapeshellarg($tika_path);
   }
 
-  $cmd = $java_path . $param . ' -jar ' . escapeshellarg($tika) . ' -t ' . escapeshellarg($filepath);
-  if (strpos(ini_get('extension_dir'), 'MAMP/')) {
-    $cmd = 'export DYLD_LIBRARY_PATH=""; ' . $cmd;
+  if (DIRECTORY_SEPARATOR == '\\') {
+    // If we on windows, use an other methode to escape the file path strings,
+    // to prevent problems with paths that contains spaces. Because the
+    // PHP escapeshellarg() function handle these correct.
+    $cmd = $java_path . $param . ' -jar "' . str_replace('"', '\\"', $tika) . '" -t "' . str_replace('"', '\\"', $filepath) . '"';
+  }
+  else {
+    $cmd = $java_path . $param . ' -jar ' . escapeshellarg($tika) . ' -t ' . escapeshellarg($filepath);
+    if (strpos(ini_get('extension_dir'), 'MAMP/')) {
+      $cmd = 'export DYLD_LIBRARY_PATH=""; ' . $cmd;
+    }
   }
 
   return shell_exec($cmd);

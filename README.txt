@@ -31,6 +31,9 @@ INSTALLATION
    and activate 'Search File Attachments' under the 'Active search modules'
    section.
 
+Note: If you run the drupal cron via drush you need to set the $base_url
+      variable in your settings.php configuration file.
+
 MAINTAINER
 ==========
 - cbeier (Christian Beier)

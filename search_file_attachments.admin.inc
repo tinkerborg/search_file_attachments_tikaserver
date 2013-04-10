@@ -50,6 +50,20 @@ function search_file_attachments_settings_form() {
     '#default_value' => variable_get('search_file_attachments_exclude_formats', 'aif, art, avi, bmp, gif, ico, mov, oga, ogv, png, psd, ra, ram, rgb'),
   );
 
+  // Advanced settings.
+  $form['advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $form['advanced']['search_file_attachments_debug'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Activate Debugging'),
+    '#description' => t('Activate this option only for development and not on production sites.'),
+    '#default_value' => variable_get('search_file_attachments_debug', FALSE),
+  );
+
   return system_settings_form($form);
 }
 

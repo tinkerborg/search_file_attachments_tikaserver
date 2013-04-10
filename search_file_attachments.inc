@@ -206,6 +206,23 @@ function search_file_attachments_extract_tika($file) {
     }
   }
 
+  // Debug print.
+  if (variable_get('search_file_attachments_debug', FALSE)) {
+    $result = shell_exec($cmd . ' 2>&1');
+    watchdog('search_file_attachments', '<p><strong>Tika Command:</strong> <code>%command</code></p><br /> <p><strong>Result:</strong> %result</p>', array(
+      '%command' => $cmd,
+      '%result' => $result,
+    ));
+
+    // Empty the result, if it contains an error message, so that the error
+    // is not in the index.
+    if (strpos($result, 'Exception in thread') !== FALSE ) {
+      $result = FALSE;
+    }
+
+    return $result;
+  }
+
   return shell_exec($cmd);
 }
 

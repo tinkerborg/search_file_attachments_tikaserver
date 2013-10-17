@@ -18,6 +18,7 @@ function search_file_attachments_requirements($phase) {
     if (!search_file_attachments_check_java()) {
       $requirements['search_file_attachments_java'] = array(
         'title' => $t('Java executable not found'),
+        'value' => $t('Not found'),
         'description' => $t('Could not execute a java command. You may need to
           set the path of the correct java binary in the
           <a href="!link">module settings</a>.',
@@ -26,10 +27,22 @@ function search_file_attachments_requirements($phase) {
       );
     }
 
+    $tika_path = realpath(variable_get('search_file_attachments_tika_path', ''));
+    $tika = realpath($tika_path . '/' . variable_get('search_file_attachments_tika_jar', ''));
+    if (empty($tika) || !is_file($tika_path . $tika)) {
+      $requirements['search_file_attachments_tika_library'] = array(
+        'title' => $t('Tika library not installed'),
+        'value' => $t('<a href="!link">Not found</a>', array('!link' => url('admin/config/search/file_attachments'))),
+        'description' => $t('The required Tika library is not installed or was not found.'),
+        'severity' => REQUIREMENT_WARNING,
+      );
+    }
+
     // Check if Safe Mode enabled or exec() is disabled.
     if ($safe_mode = ini_get('safe_mode') && drupal_strtolower($safe_mode) != 'off') {
       $requirements['search_file_attachments_safe_mode'] = array(
         'title' => $t('Save Mode is activated'),
+        'value' => $t('Enabled'),
         'description' => $t('Save Mode is enabled in your PHP settings.
           You need to disabled it so that Tika can be executed.'),
         'severity' => REQUIREMENT_ERROR,
@@ -39,6 +52,7 @@ function search_file_attachments_requirements($phase) {
     if (in_array('exec', array_map('trim', explode(',', ini_get('disable_functions'))))) {
       $requirements['search_file_attachments_exec'] = array(
         'title' => $t('exec() is disabled.'),
+        'value' => $t('Disabled'),
         'description' => $t('The PHP function exec() is disabled in your
           PHP settings (php.ini). Tika can not be executed.'),
         'severity' => REQUIREMENT_ERROR,

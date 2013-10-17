@@ -28,8 +28,8 @@ function search_file_attachments_requirements($phase) {
     }
 
     $tika_path = realpath(variable_get('search_file_attachments_tika_path', ''));
-    $tika = realpath($tika_path . '/' . variable_get('search_file_attachments_tika_jar', ''));
-    if (empty($tika) || !is_file($tika_path . $tika)) {
+    $tika = variable_get('search_file_attachments_tika_jar', '');
+    if (empty($tika) || !is_file($tika_path . '/' . $tika)) {
       $requirements['search_file_attachments_tika_library'] = array(
         'title' => $t('Tika library not installed'),
         'value' => $t('<a href="!link">Not found</a>', array('!link' => url('admin/config/search/file_attachments'))),

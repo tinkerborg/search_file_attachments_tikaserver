@@ -186,6 +186,11 @@ function search_file_attachments_extract_tika($file) {
     throw new Exception(t('Invalid path or filename for tika application jar.'));
   }
 
+  // UTF-8 multibyte characters will be stripped by escapeshellargs().
+  // So temporarily set the locale to UTF-8 so that the filepath remain valid.
+  $backup_locale = setlocale(LC_CTYPE, '0');
+  setlocale(LC_CTYPE, 'en_US.UTF-8');
+
   $param = '';
   $java_path = search_file_attachments_java_path();
 
@@ -206,6 +211,12 @@ function search_file_attachments_extract_tika($file) {
     }
   }
 
+  // Support utf-8 commands:
+  // http://www.php.net/manual/pt_BR/function.shell-exec.php#85095
+  $cmd = "LANG=en_US.utf-8; $cmd";
+  // Restore the locale.
+  setlocale(LC_CTYPE, $backup_locale);
+
   // Debug print.
   if (variable_get('search_file_attachments_debug', FALSE)) {
     $result = shell_exec($cmd . ' 2>&1');
@@ -216,7 +227,7 @@ function search_file_attachments_extract_tika($file) {
 
     // Empty the result, if it contains an error message, so that the error
     // is not in the index.
-    if (strpos($result, 'Exception in thread') !== FALSE ) {
+    if (strpos($result, 'Exception in thread') !== FALSE) {
       $result = FALSE;
     }
 

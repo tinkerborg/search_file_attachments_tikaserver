@@ -272,6 +272,13 @@ function search_file_attachments_exif_tagmarker() {
 }
 
 /**
+ * Returns a string representing the current list of excluded file extensions.
+ */
+function search_file_attachments_excluded_formats() {
+  return variable_get('search_file_attachments_exclude_formats', 'aif, art, avi, bmp, gif, ico, mov, oga, ogv, png, psd, ra, ram, rgb');
+}
+
+/**
  * Get the mimetypes of the excluded file extensions.
  *
  * @return array
@@ -279,7 +286,7 @@ function search_file_attachments_exif_tagmarker() {
  */
 function search_file_attachments_excluded_extensions() {
   // Get the excluded formats.
-  $excluded_extensions = variable_get('search_file_attachments_exclude_formats', '');
+  $excluded_extensions = search_file_attachments_excluded_formats();
   $excluded_extensions = preg_replace('/[^a-zA-z0-9,]/', '', $excluded_extensions);
   $excluded_extensions = explode(',', $excluded_extensions);
 

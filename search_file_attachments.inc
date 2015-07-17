@@ -51,9 +51,11 @@ function search_file_attachments_shutdown() {
  * Load the files to be indexed.
  *
  * @param int $last_change
- *   The timestamp of the last indexed file.
+ *   The timestamp of the last indexed file, or the timestamp of the last time
+ *   that files were indexed (if the last indexed file is also the one with the
+ *   largest file ID).
  * @param int $last_id
- *   The fid of the last indexed file.
+ *   The highest file ID of all files that have been previously indexed.
  *
  * @return array
  *   The array with the file objects.
@@ -67,8 +69,8 @@ function search_file_attachments_get_files($last_change = 0, $last_id = 0) {
         ->condition('f.status', 1)
         ->condition(db_or()
           ->condition('f.fid', $last_id, '>')
-          ->condition('f.timestamp', $last_change), '>')
-        ->orderBy('f.timestamp')
+          ->condition('f.timestamp', $last_change, '>'))
+        ->orderBy('f.fid')
         ->range(0, $limit);
   $results = $query->execute();
 

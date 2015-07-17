@@ -75,8 +75,18 @@ function search_file_attachments_update_index() {
   $excluded_extensions = search_file_attachments_excluded_extensions();
 
   foreach ($index_files as $file) {
-    $_search_file_attachments_last_change = $file->timestamp;
-    $_search_file_attachments_last_id = $file->fid;
+    // We index all files in order of file ID, going back to reindex old ones
+    // only if they were edited since the last time files were indexed. See
+    // search_file_attachments_get_files().
+    if ($file->fid > $_search_file_attachments_last_id) {
+      $_search_file_attachments_last_id = $file->fid;
+      $_search_file_attachments_last_change = REQUEST_TIME;
+    }
+    else {
+      // We are reindexing an old file. Use that as the last change, so that
+      // any other old files edited after it also get reindexed.
+      $_search_file_attachments_last_change = $file->timestamp;
+    }
 
     if (!in_array($file->filemime, $excluded_extensions)) {
       $content = t('Filename') . ': ' . $file->filename . ' - ' . t('Content') . ': ';
@@ -88,8 +98,10 @@ function search_file_attachments_update_index() {
 
       // Cache the extracted file content to use it later for the
       // search results.
-      $record = array('fid' => $file->fid, 'content' => $extracted_content);
-      drupal_write_record('search_file_attachments_index', $record);
+      db_merge('search_file_attachments_index')
+        ->key(array('fid' => $file->fid))
+        ->fields(array('content' => $extracted_content))
+        ->execute();
     }
 
     variable_set('search_file_attachments_cron_last_change', $_search_file_attachments_last_change);

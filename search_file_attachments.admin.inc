@@ -47,7 +47,7 @@ function search_file_attachments_settings_form() {
   $form['files']['search_file_attachments_exclude_formats'] = array(
     '#type' => 'textfield',
     '#title' => t('Exclude file extensions'),
-    '#default_value' => search_file_attachments_excluded_formats(),
+    '#default_value' => search_file_attachments_excluded_extensions(),
   );
 
   // Advanced settings.

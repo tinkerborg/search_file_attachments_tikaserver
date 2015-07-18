@@ -72,7 +72,8 @@ function search_file_attachments_update_index() {
   $_search_file_attachments_last_id = variable_get('search_file_attachments_cron_last_id', 0);
 
   $index_files = search_file_attachments_get_files($_search_file_attachments_last_change, $_search_file_attachments_last_id);
-  $excluded_extensions = search_file_attachments_excluded_extensions();
+  $excluded_formats = search_file_attachments_excluded_extensions();
+  $excluded_mimetypes = search_file_attachments_extensions_to_mimetypes($excluded_formats);
 
   foreach ($index_files as $file) {
     // We index all files in order of file ID, going back to reindex old ones
@@ -88,7 +89,7 @@ function search_file_attachments_update_index() {
       $_search_file_attachments_last_change = $file->timestamp;
     }
 
-    if (!in_array($file->filemime, $excluded_extensions)) {
+    if (!in_array($file->filemime, $excluded_mimetypes)) {
       $content = t('Filename') . ': ' . $file->filename . ' - ' . t('Content') . ': ';
 
       // Extract the file content and add it to the drupal search index.

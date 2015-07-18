@@ -274,31 +274,31 @@ function search_file_attachments_exif_tagmarker() {
 /**
  * Returns a string representing the current list of excluded file extensions.
  */
-function search_file_attachments_excluded_formats() {
+function search_file_attachments_excluded_extensions() {
   return variable_get('search_file_attachments_exclude_formats', 'aif, art, avi, bmp, gif, ico, mov, oga, ogv, png, psd, ra, ram, rgb');
 }
 
 /**
  * Get the mimetypes of the excluded file extensions.
  *
+ * @param string $extensions
+ *  A comma-separated string with file extensions.
+ *
  * @return array
  *   The exluded mimetypes.
  */
-function search_file_attachments_excluded_extensions() {
-  // Get the excluded formats.
-  $excluded_extensions = search_file_attachments_excluded_formats();
-  $excluded_extensions = preg_replace('/[^a-zA-z0-9,]/', '', $excluded_extensions);
-  $excluded_extensions = explode(',', $excluded_extensions);
+function search_file_attachments_extensions_to_mimetypes($extensions) {
+  $extensions = preg_replace('/[^a-zA-z0-9,]/', '', $extensions);
+  $extensions = explode(',', $extensions);
 
-  $exclude = array();
-
-  if (!empty($excluded_extensions)) {
+  $mimetypes = array();
+  if (!empty($extensions)) {
     // The default file map, defined in file.mimetypes.inc is quite big.
     // We only load it when necessary.
     include_once DRUPAL_ROOT . '/includes/file.mimetypes.inc';
     $mapping = file_mimetype_mapping();
 
-    foreach ($excluded_extensions as $ext) {
+    foreach ($extensions as $ext) {
       $ext = drupal_strtolower($ext);
       $mimetype = 'application/octet-stream';
       if (isset($mapping['extensions'][$ext])) {
@@ -307,9 +307,9 @@ function search_file_attachments_excluded_extensions() {
           $mimetype = $mapping['mimetypes'][$mimetype_key];
         }
       }
-      $exclude[] = $mimetype;
+      $mimetypes[] = $mimetype;
     }
   }
 
-  return $exclude;
+  return $mimetypes;
 }

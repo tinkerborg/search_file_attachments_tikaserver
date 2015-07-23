@@ -86,7 +86,7 @@ function search_file_attachments_uninstall() {
   variable_del('search_file_attachments_tika_path');
   variable_del('search_file_attachments_tika_jar');
   variable_del('search_file_attachments_java_path');
-  variable_del('search_file_attachments_exclude_formats');
+  variable_del('search_file_attachments_include_extensions');
   variable_del('search_file_attachments_cron_last_change');
   variable_del('search_file_attachments_cron_last_id');
 
@@ -131,4 +131,11 @@ function search_file_attachments_schema() {
     ),
   );
   return $schema;
+}
+
+/**
+ * Remove the old variable 'search_file_attachments_exclude_formats'.
+ */
+function search_file_attachments_update_7101() {
+  variable_del('search_file_attachments_exclude_formats');
 }

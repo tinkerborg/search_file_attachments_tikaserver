@@ -272,10 +272,10 @@ function search_file_attachments_exif_tagmarker() {
 }
 
 /**
- * Returns a string representing the current list of excluded file extensions.
+ * Returns a string representing the current list of included file extensions.
  */
-function search_file_attachments_excluded_extensions() {
-  return variable_get('search_file_attachments_exclude_formats', 'aif, art, avi, bmp, gif, ico, mov, oga, ogv, png, psd, ra, ram, rgb');
+function search_file_extensions_included_extensions() {
+  return variable_get('search_file_attachments_include_extensions', 'pdf, doc, docx, xls, xlsx, ppt, pptx, txt, jpg, jpeg');
 }
 
 /**

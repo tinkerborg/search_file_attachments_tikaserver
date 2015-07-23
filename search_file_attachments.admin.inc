@@ -44,10 +44,11 @@ function search_file_attachments_settings_form() {
     '#type' => 'fieldset',
     '#title' => t('File settings'),
   );
-  $form['files']['search_file_attachments_exclude_formats'] = array(
+  $form['files']['search_file_attachments_include_extensions'] = array(
     '#type' => 'textfield',
-    '#title' => t('Exclude file extensions'),
-    '#default_value' => search_file_attachments_excluded_extensions(),
+    '#title' => t('Include file extensions'),
+    '#description' => t('A comma-separated list of file extensions that will be included to the file search index.'),
+    '#default_value' => search_file_extensions_included_extensions(),
   );
 
   // Advanced settings.

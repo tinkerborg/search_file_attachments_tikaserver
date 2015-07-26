@@ -288,7 +288,7 @@ function search_file_extensions_included_extensions() {
  *   The exluded mimetypes.
  */
 function search_file_attachments_extensions_to_mimetypes($extensions) {
-  $extensions = preg_replace('/[^a-zA-z0-9,]/', '', $extensions);
+  $extensions = preg_replace('/[^a-zA-z0-9\/\-,]/', '', $extensions);
   $extensions = explode(',', $extensions);
 
   $mimetypes = array();
@@ -306,6 +306,9 @@ function search_file_attachments_extensions_to_mimetypes($extensions) {
         if (isset($mapping['mimetypes'][$mimetype_key])) {
           $mimetype = $mapping['mimetypes'][$mimetype_key];
         }
+      }
+      elseif (in_array($ext, $mapping['mimetypes'])) {
+        $mimetype = $ext;
       }
       $mimetypes[] = $mimetype;
     }

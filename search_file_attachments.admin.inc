@@ -46,8 +46,8 @@ function search_file_attachments_settings_form() {
   );
   $form['files']['search_file_attachments_include_extensions'] = array(
     '#type' => 'textfield',
-    '#title' => t('Include file extensions'),
-    '#description' => t('A comma-separated list of file extensions that will be included to the file search index.'),
+    '#title' => t('Include file extensions or mimetypes'),
+    '#description' => t('A comma-separated list of file extensions or mimetypes that will be included to the file search index.'),
     '#default_value' => search_file_extensions_included_extensions(),
   );
 

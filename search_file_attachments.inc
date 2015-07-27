@@ -275,7 +275,7 @@ function search_file_attachments_exif_tagmarker() {
  * Returns a string representing the current list of included file extensions.
  */
 function search_file_extensions_included_extensions() {
-  return variable_get('search_file_attachments_include_extensions', 'pdf, doc, docx, xls, xlsx, ppt, pptx, txt, jpg, jpeg');
+  return variable_get('search_file_attachments_include_extensions', 'pdf, doc, docx, xls, xlsx, ppt, pptx, txt, rtf, jpg, jpeg, tiff, odt, ods, odp, odg, odc, ofd, odi, odm, epub');
 }
 
 /**

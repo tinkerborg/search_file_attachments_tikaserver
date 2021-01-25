@@ -14,29 +14,8 @@ function search_file_attachments_requirements($phase) {
 
   require_once dirname(__FILE__) . '/search_file_attachments.inc';
   if ($phase == 'runtime') {
-    // Check if java is available and executable.
-    if (!search_file_attachments_check_java()) {
-      $requirements['search_file_attachments_java'] = array(
-        'title' => $t('Java executable not found'),
-        'value' => $t('Not found'),
-        'description' => $t('Could not execute a java command. You may need to
-          set the path of the correct java binary in the
-          <a href="!link">module settings</a>.',
-          array('!link' => url('admin/config/search/file_attachments'))),
-        'severity' => REQUIREMENT_INFO,
-      );
-    }
+    // TODO - check if libcurl exists
 
-    $tika_path = realpath(variable_get('search_file_attachments_tika_path', ''));
-    $tika = variable_get('search_file_attachments_tika_jar', '');
-    if (empty($tika) || !is_file($tika_path . '/' . $tika)) {
-      $requirements['search_file_attachments_tika_library'] = array(
-        'title' => $t('Tika library not installed'),
-        'value' => $t('<a href="!link">Not found</a>', array('!link' => url('admin/config/search/file_attachments'))),
-        'description' => $t('The required Tika library is not installed or was not found.'),
-        'severity' => REQUIREMENT_WARNING,
-      );
-    }
 
     // Check if Safe Mode enabled or exec() is disabled.
     if ($safe_mode = ini_get('safe_mode') && drupal_strtolower($safe_mode) != 'off') {
@@ -83,9 +62,10 @@ function search_file_attachments_install() {
  * Implements hook_uninstall().
  */
 function search_file_attachments_uninstall() {
-  variable_del('search_file_attachments_tika_path');
-  variable_del('search_file_attachments_tika_jar');
-  variable_del('search_file_attachments_java_path');
+  variable_del('search_file_attachments_tika_url');
+  variable_del('search_file_attachments_tika_tls_cert');
+  variable_del('search_file_attachments_tika_tls_key');
+  variable_del('search_file_attachments_tika_tls_ca_cert');
   variable_del('search_file_attachments_include_extensions');
   variable_del('search_file_attachments_cron_last_change');
   variable_del('search_file_attachments_cron_last_id');

@@ -6,37 +6,6 @@
  */
 
 /**
- * Check if java is available and executable.
- *
- * @param string $path
- *   The full path to the Java binary. e.g. /usr/bin/java
- */
-function search_file_attachments_check_java($path = NULL) {
-  $path = $path ? $path : 'java';
-
-  $temp = tempnam(file_directory_temp(), 'asa');
-  if (strpos(ini_get('extension_dir'), 'MAMP/')) {
-    $path = 'export DYLD_LIBRARY_PATH=""; ' . $path;
-  }
-  exec($path . ' -version > ' . $temp . ' 2>&1');
-  $stderror = file_get_contents($temp);
-  $found = preg_match('/Runtime Environment/', $stderror);
-
-  return $found ? TRUE : FALSE;
-}
-
-/**
- * Returns the path to the java binary.
- *
- * @return string
- */
-function search_file_attachments_java_path() {
-  $settings_path = variable_get('search_file_attachments_java_path', '');
-  $path = !empty($settings_path) ? $settings_path : 'java';
-  return $path;
-}
-
-/**
  * Shutdown function to make sure we remember the last element processed.
  */
 function search_file_attachments_shutdown() {
@@ -170,8 +139,11 @@ function search_file_attachments_extract_exif($file) {
   return $content;
 }
 
+function remote_index($file) {
+}
+
 /**
- * Extract file content with Apache Tika.
+ * Extract file content with Apache Tika Server.
  *
  * @param object $file
  *   The file object.
@@ -181,62 +153,39 @@ function search_file_attachments_extract_exif($file) {
  * @throws Exception
  */
 function search_file_attachments_extract_tika($file) {
-  $filepath = file_create_url($file->uri);
-  $tika_path = realpath(variable_get('search_file_attachments_tika_path', ''));
-  $tika = realpath($tika_path . '/' . variable_get('search_file_attachments_tika_jar', ''));
-  if (!($tika) || !is_file($tika)) {
-    throw new Exception(t('Invalid path or filename for tika application jar.'));
+  $filepath = drupal_realpath($file->uri);
+
+  $req = curl_init();
+
+  curl_setopt_array($req, [
+    CURLOPT_VERBOSE => true,
+    CURLOPT_URL => search_file_attachments_tika_url('tika'),
+    CURLOPT_HTTPHEADER =>  array("Accept: text/plain"),
+    CURLOPT_RETURNTRANSFER =>  1,
+    CURLOPT_PUT =>  true,
+    CURLOPT_INFILE =>  fopen($filepath, 'r'),
+    CURLOPT_INFILESIZE =>  filesize($filepath),
+  ]);
+
+  if ($ca = search_file_attachments_path('search_file_attachments_tls_ca_cert')) {
+    curl_setopt($req, CURLOPT_CAINFO, $ca);
   }
 
-  // UTF-8 multibyte characters will be stripped by escapeshellargs().
-  // So temporarily set the locale to UTF-8 so that the filepath remain valid.
-  $backup_locale = setlocale(LC_CTYPE, '0');
-  setlocale(LC_CTYPE, 'en_US.UTF-8');
-
-  $param = '';
-  $java_path = search_file_attachments_java_path();
-
-  if ($file->filemime != 'audio/mpeg') {
-    $param = ' -Dfile.encoding=UTF8 -cp ' . escapeshellarg($tika_path);
+  if ($cert = search_file_attachments_path('search_file_attachments_tls_cert')) {
+    curl_setopt($req, CURLOPT_SSLCERT, $cert);
   }
 
-  if (DIRECTORY_SEPARATOR == '\\') {
-    // If we on windows, use an other methode to escape the file path strings,
-    // to prevent problems with paths that contains spaces. Because the
-    // PHP escapeshellarg() function handle these correct.
-    $cmd = $java_path . $param . ' -jar "' . str_replace('"', '\\"', $tika) . '" -t "' . str_replace('"', '\\"', $filepath) . '"';
-  }
-  else {
-    $cmd = $java_path . $param . ' -jar ' . escapeshellarg($tika) . ' -t ' . escapeshellarg($filepath);
-    if (strpos(ini_get('extension_dir'), 'MAMP/')) {
-      $cmd = 'export DYLD_LIBRARY_PATH=""; ' . $cmd;
-    }
+  if ($key = search_file_attachments_path('search_file_attachments_tls_key')) {
+    curl_setopt($req, CURLOPT_SSLKEY, $key);
   }
 
-  // Support utf-8 commands:
-  // http://www.php.net/manual/pt_BR/function.shell-exec.php#85095
-  $cmd = "LANG=en_US.utf-8; $cmd";
-  // Restore the locale.
-  setlocale(LC_CTYPE, $backup_locale);
-
-  // Debug print.
-  if (variable_get('search_file_attachments_debug', FALSE)) {
-    $result = shell_exec($cmd . ' 2>&1');
-    watchdog('search_file_attachments', '<p><strong>Tika Command:</strong> <code>%command</code></p><br /> <p><strong>Result:</strong> %result</p>', array(
-      '%command' => $cmd,
-      '%result' => $result,
-    ));
-
-    // Empty the result, if it contains an error message, so that the error
-    // is not in the index.
-    if (strpos($result, 'Exception in thread') !== FALSE) {
-      $result = FALSE;
-    }
-
-    return $result;
+  $content = curl_exec($req);
+  $res  = curl_getinfo($req);
+  curl_close($req);
+  # TODO - error handling
+  if ($res['http_code'] == 200) {
+    return $content;
   }
-
-  return shell_exec($cmd);
 }
 
 /**
@@ -269,6 +218,25 @@ function search_file_attachments_exif_tagmarker() {
   drupal_alter('search_file_attachments_exif_tagmarker', $tagmarker);
 
   return $tagmarker;
+}
+
+/**
+ * Returns the Tika server base URL
+ */
+function search_file_attachments_tika_url($path = '') {
+  $base_url = variable_get('search_file_attachments_tika_url', 'http://localhost:9998');
+  return join('/', array(rtrim($base_url, '/'), $path));
+}
+
+/**
+ * Returns a file object from the config
+ */
+function search_file_attachments_path($var) {
+  $fid = variable_get($var);
+  if ($fid > 0) {
+    $file = file_load($fid);
+    return drupal_realpath($file->uri);
+  }
 }
 
 /**

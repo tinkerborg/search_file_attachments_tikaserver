@@ -13,37 +13,71 @@ require_once dirname(__FILE__) . '/search_file_attachments.inc';
 function search_file_attachments_settings_form() {
   $form = array();
 
+  $conf_dir = 'private://search_file_attachments';
+
+  $form['#submit'][] = 'search_file_attachments_settings_submit';
+
   // Apache Tika configuration.
   $form['tika'] = array(
     '#type' => 'fieldset',
     '#title' => t('Apache Tika'),
   );
-  $form['tika']['search_file_attachments_tika_path'] = array(
+
+  $form['tika']['search_file_attachments_tika_url'] = array(
     '#type' => 'textfield',
-    '#title' => t('Tika directory path:'),
-    '#default_value' => variable_get('search_file_attachments_tika_path', ''),
-    '#description' => t('The full path to tika directory.'),
+    '#title' => t('Tika Server URL:'),
+    '#default_value' => search_file_attachments_tika_url(),
+    '#description' => t('The base URL of the Tika server.'),
   );
-  $form['tika']['search_file_attachments_tika_jar'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Tika jar file:'),
-    '#default_value' => variable_get('search_file_attachments_tika_jar', 'tika-app-1.2.jar'),
-    '#description' => t('The name of the tika CLI application jar file, e.g. tika-app-1.2.jar.'),
+
+  // Advanced settings.
+  $form['tika']['tls'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('TLS Settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
-  if (!search_file_attachments_check_java()) {
-    $form['tika']['search_file_attachments_java_path'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Java path:'),
-      '#default_value' => variable_get('search_file_attachments_java_path', ''),
-      '#description' => t('The full path to the Java binary. This setting is only needed if Java could not automatically detected.'),
-    );
-  }
+
+  $form['tika']['tls']['search_file_attachments_tls_cert'] = [
+    '#type' => 'managed_file',
+    '#title' => t('Client Certificate (PEM)'),
+    '#upload_location' => $conf_dir,
+    '#default_value' => variable_get('search_file_attachments_tls_cert'),
+
+    '#upload_validators' => [
+      'file_validate_extensions' => ['crt', 'pem'],
+    ],
+  ];
+
+  $form['tika']['tls']['search_file_attachments_tls_key'] = [
+    '#type' => 'managed_file',
+    '#title' => t('Client Private Key'),
+    '#upload_location' => $conf_dir,
+    '#default_value' => variable_get('search_file_attachments_tls_key'),
+
+    '#upload_validators' => [
+      'file_validate_extensions' => ['key', 'pem'],
+    ],
+  ];
+
+  $form['tika']['tls']['search_file_attachments_tls_ca_cert'] = [
+    '#type' => 'managed_file',
+    '#title' => t('TLS CA Certificate'),
+    '#upload_location' => $conf_dir,
+    '#default_value' => variable_get('search_file_attachments_tls_ca_cert'),
+
+    '#upload_validators' => [
+      'file_validate_extensions' => ['crt', 'pem'],
+    ],
+  ];
+
 
   // File settings.
   $form['files'] = array(
     '#type' => 'fieldset',
     '#title' => t('File settings'),
   );
+
   $form['files']['search_file_attachments_include_extensions'] = array(
     '#type' => 'textfield',
     '#title' => t('Include file extensions or mimetypes'),
@@ -58,6 +92,7 @@ function search_file_attachments_settings_form() {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
   );
+
   $form['advanced']['search_file_attachments_debug'] = array(
     '#type' => 'checkbox',
     '#title' => t('Activate Debugging'),
@@ -72,14 +107,29 @@ function search_file_attachments_settings_form() {
  * Validation handler for the settings form.
  */
 function search_file_attachments_settings_form_validate($form, &$form_state) {
-  if (empty($form_state['values']['search_file_attachments_tika_jar'])) {
-    form_set_error('search_file_attachments_tika_jar', t('Tika jar is mandatory.'));
-  }
-  $path = realpath($form_state['values']['search_file_attachments_tika_path']);
-  if (!file_exists($path . '/' . $form_state['values']['search_file_attachments_tika_jar'])) {
-    form_set_error('search_file_attachments_tika_path', t('Tika jar file not found at this path.'));
-  }
-  if (isset($form_state['values']['search_file_attachments_java_path']) && !search_file_attachments_check_java($form_state['values']['search_file_attachments_java_path'])) {
-    form_set_error('search_file_attachments_java_path', t('Java was not found or is executable at the specified path.'));
+  #if (empty($form_state['values']['search_file_attachments_tika_jar'])) {
+  #  form_set_error('search_file_attachments_tika_jar', t('Tika jar is mandatory.'));
+  #}
+  #$path = realpath($form_state['values']['search_file_attachments_tika_path']);
+  #if (!file_exists($path . '/' . $form_state['values']['search_file_attachments_tika_jar'])) {
+  #  form_set_error('search_file_attachments_tika_path', t('Tika jar file not found at this path.'));
+  #}
+}
+
+/**
+ * Submit handler for the settings form.
+ */
+function search_file_attachments_settings_submit($form, &$form_state) {
+  foreach (array_filter(
+    array_intersect_key($form_state['values'],
+      array_flip(
+        preg_grep('/^search_file_attachments_tls/', array_keys($form_state['values']))
+      )
+    ), function($fid) { return $fid > 0; }
+  ) as &$fid) {
+   $file = file_load($fid);
+   $file->status = FILE_STATUS_PERMANENT;
+   file_save($file);
+   file_usage_add($file, 'search_file_attachments', 'tls', $fid);
   }
 }

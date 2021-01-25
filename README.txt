@@ -1,4 +1,4 @@
-Search File Attachments
+Search File Attachments - With Tika Server/Mututal TLS Support
 
 This modules allows the indexing and searching of file attachments. It will
 extraxt the content of attached files using the Apache Tika library and
